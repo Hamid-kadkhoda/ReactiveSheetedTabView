@@ -1,0 +1,28 @@
+@namespace System.ReactiveSheetedTabView
+
+<style>
+    #sheet-footer {
+        width: 100%;
+        position: fixed;
+        bottom: 0;
+        height: 48px;
+        border-style: solid;
+        border-top-width: 1px;
+        border-top-color: #dedede;
+        left:0;
+        background-color: #fff;
+    }
+</style>
+
+<footer id="sheet-footer" style="@Style" class="@StyleClass">
+    @ChildContent
+</footer>
+
+@code {
+
+    [Parameter] public string? Style { get; set; }
+
+    [Parameter] public string? StyleClass { get; set; }
+
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

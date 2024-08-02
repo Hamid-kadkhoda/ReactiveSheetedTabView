@@ -1,0 +1,28 @@
+﻿@namespace System.ReactiveSheetedTabView
+
+@implements IDisposable
+
+@code {
+
+    [Parameter] public Guid Key { get; set; }
+
+    [Parameter] public bool IsDefault { get; set; } = false;
+
+    [Parameter] public bool IsActive { get; set; } = false;
+
+    [Parameter] public string Title { get; set; } = null!;
+
+    [Parameter] public Type Content { get; set; } = null!;
+
+    [Parameter] public string? Icon { get; set; }
+
+    protected List<IDisposable> Subscriptions { get; set; } = new();
+
+    public void Dispose()
+    {
+        foreach (var Subscription in Subscriptions)
+        {
+            Subscription.Dispose();
+        }
+    }
+}

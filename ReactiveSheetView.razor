@@ -1,0 +1,104 @@
+﻿
+@namespace System.ReactiveSheetedTabView
+
+@inherits SectionPanel
+
+<style>
+
+    .sheet-button {
+        border-radius: 4px;
+        padding: 8px 12px;
+        line-height: 16px;
+        font-size: 12px !important;
+    }
+
+    .sheet-button-active {
+        background-color: #e5f0ff !important;
+        color: #0d6efd !important;
+        font-weight: 700;
+    }
+</style>
+
+
+@{
+    foreach (ReactiveSheetPanel Sheet in Sheets)
+    {
+        var parameters = new Dictionary<string, object>();
+
+        parameters.Add("Title", Sheet.Title);
+        parameters.Add("Content", Sheet.Content);
+        parameters.Add("Key", Sheet.Key);
+        parameters.Add("IsDefault", Sheet.IsDefault);
+        parameters.Add("IsActive", Sheet.IsActive);
+
+        <DynamicComponent Type="Sheet.GetType()" Parameters="@parameters"></DynamicComponent>
+    }
+}
+
+@if (Sheets.Count > 0)
+{
+    <Footer>
+        <FlexLayout>
+            @foreach (ReactiveSheetPanel Sheet in Sheets)
+            {
+                <button class="sheet-button
+                        @(Sheet.IsActive ? "sheet-button-active" : "")"
+                        @onclick="() => ActivatedSheet(Sheet)">
+
+                    @if (Sheet.IsDefault)
+                    {
+                        <FlexLayout>
+                            <SheetListIcon Width="16" Height="16"
+                                           Color="@(Sheet.IsActive ? "#0d6efd" : "#6C757D")">
+                            </SheetListIcon>
+                            <span class="text-sm">List</span>
+                        </FlexLayout>
+                    }
+                    else
+                    {
+                        <FlexLayout Spacing="2">
+                            <span style="font-size: 12px">@Sheet.Title</span>
+                            <div role="button"
+                            @onclick:preventDefault
+                            @onclick:stopPropagation
+                                 @onclick="() => CloseSheet(Sheet)"
+                                 title="Close Tab">
+                                <CloseIcon Color="@(Sheet.IsActive ? "#0d6efd" : "#6C757D")"></CloseIcon>
+                            </div>
+                        </FlexLayout>
+                    }
+                </button>
+            }
+        </FlexLayout>
+    </Footer>
+}
+
+@code {
+
+    [Inject] public ReactiveTabSheetManager TabSheetManager { get; set; } = default!;
+
+    [CascadingParameter] public ReactiveSheetedTabPanel Parent { get; set; } = new();
+
+    public List<ReactiveSheetPanel> Sheets { get; set; } = new();
+
+    protected override void OnInitialized()
+    {
+        var sub = TabSheetManager.TabsChange().Subscribe(tabs =>
+        {
+            Sheets = tabs.FirstOrDefault(t => t.Key == Parent.Key)!.Sheets;
+            StateHasChanged();
+        });
+
+        Subscriptions.Add(sub);
+    }
+
+    private void ActivatedSheet(ReactiveSheetPanel sheet)
+    {
+        TabSheetManager.ActivatedSheet(sheet);
+    }
+
+    private void CloseSheet(ReactiveSheetPanel sheet)
+    {
+        TabSheetManager.RemoveSheet(sheet);
+    }
+}

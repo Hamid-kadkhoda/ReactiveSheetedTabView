@@ -1,0 +1,123 @@
+﻿
+@namespace System.ReactiveSheetedTabView
+
+@code {
+
+    private BehaviorSubject<List<ReactiveSheetedTabPanel>> _TabsSubjects = new([]);
+
+    public List<ReactiveSheetedTabPanel> Tabs => _TabsSubjects.Value;
+
+    public ReactiveSheetedTabPanel ActiveTab => _TabsSubjects.Value.FirstOrDefault(c => c.IsActive)!;
+
+    public List<ReactiveSheetPanel> ActiveTabSheets => ActiveTab!.Sheets;
+
+    public void AddTab(string Key, bool IsDefault = false)
+    {
+        var tab = new ReactiveSheetedTabPanel
+            {
+                Content = GetComponentType.FromAssemblyBy(Key),
+                Title = Key,
+                IsDefault = IsDefault,
+                IsActive = IsDefault,
+                Key = Guid.NewGuid()
+            };
+
+        Tabs.Add(tab);
+
+        if (Tabs.Count == 1)
+        {
+            ActivatedTab(Tabs.FirstOrDefault()!);
+        }
+        else
+        {
+            ActivatedTab(Tabs.LastOrDefault()!);
+        }
+
+        AddSheet(Key, true);
+        if (!IsDefault)
+        {
+        }
+
+        PublishTabs(Tabs);
+    }
+
+
+    private void PublishTabs(List<ReactiveSheetedTabPanel> tabs)
+    {
+        _TabsSubjects.OnNext(tabs);
+        Console.WriteLine($"Tabs Published Successfully");
+    }
+
+
+    public void AddSheet(string title, bool IsDefault = false)
+    {
+        var sheet = new ReactiveSheetPanel()
+            {
+                Content = IsDefault ? ActiveTab!.Content : GetComponentType.FromAssemblyBy(title),
+                Title = title,
+                IsDefault = IsDefault,
+                IsActive = IsDefault,
+                Key = Guid.NewGuid()
+            };
+
+        ActiveTab!.Sheets.Add(sheet);
+
+        if (ActiveTab.Sheets.Count == 1)
+        {
+            ActivatedSheet(ActiveTab.Sheets.FirstOrDefault()!);
+        }
+        else
+        {
+            ActivatedSheet(ActiveTab.Sheets.LastOrDefault()!);
+        }
+
+        PublishTabs(Tabs);
+    }
+
+    public void ActivatedSheet(ReactiveSheetPanel sheet)
+    {
+        var sheets = ActiveTab.Sheets.Where(s => s.Key != sheet.Key).ToList();
+
+        if(sheets.Count > 0)
+        {
+            foreach (ReactiveSheetPanel item in sheets)
+            {
+                item.IsActive = false;
+                Console.WriteLine($"sheet {item.Title} active is {item.IsActive}");
+            }            
+        }
+
+        sheet.IsActive = true;
+    }
+
+    public void ActivatedTab(ReactiveSheetedTabPanel Tab)
+    {
+        var list = Tabs.Where(t => t.Key != Tab.Key).ToList();
+
+        foreach (ReactiveSheetedTabPanel item in list)
+        {
+            item.IsActive = false;
+            Console.WriteLine($"Tab {item.Title} active is {item.IsActive}");
+        }
+
+        Tab.IsActive = true;
+    }
+
+    public void RemoveSheet(ReactiveSheetPanel sheet)
+    {
+        ActiveTabSheets.Remove(sheet);
+        ActiveTabSheets.LastOrDefault()!.IsActive = true;
+    }
+
+    public void RemoveTab(ReactiveSheetedTabPanel Tab)
+    {
+        Tabs.Remove(Tab);
+        Tab.Sheets = [];
+        Tabs.LastOrDefault()!.IsActive = true;
+    }
+
+    public BehaviorSubject<List<ReactiveSheetedTabPanel>> TabsChange()
+    {
+        return _TabsSubjects;
+    }
+}

@@ -1,0 +1,15 @@
+@namespace System.ReactiveSheetedTabView
+
+
+<div class="flex-layout" style="display: flex;align-items: center;">
+    @ChildContent
+</div>
+
+@code {
+
+    [Parameter] public string? Style { get; set; }
+
+    [Parameter] public string? StyleClass { get; set; }
+
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

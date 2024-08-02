@@ -1,0 +1,24 @@
+﻿@namespace System.ReactiveSheetedTabView
+
+@inherits SectionPanel
+
+<TabLayout Key="Key" StyleClass="@(ActiveTab.Key == Key ? "block" : "hidden")">
+
+    <CascadingValue Value="this">
+        <ReactiveSheetView />
+    </CascadingValue>
+
+</TabLayout>
+
+@code {
+
+    [Inject] public ReactiveTabSheetManager TabSheetManager { get; set; } = default!;
+
+    [Parameter] public List<ReactiveSheetPanel> Sheets { get; set; } = new();
+
+    private ReactiveSheetedTabPanel ActiveTab
+    {
+        get => TabSheetManager.Tabs.FirstOrDefault(t => t.IsActive)!;
+    }
+
+}

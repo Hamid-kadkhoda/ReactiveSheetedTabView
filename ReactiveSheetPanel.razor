@@ -1,0 +1,20 @@
+﻿@namespace System.ReactiveSheetedTabView
+
+@inherits SectionPanel
+
+
+<SheetLayout Key="Key" StyleClass="@(ActiveSheet.Key == Key ? "block" : "hidden")">
+    <DynamicComponent Type="@Content" />
+</SheetLayout>
+
+
+@code {
+
+    [Inject] public ReactiveTabSheetManager TabSheetManager { get; set; } = default!;
+
+    public ReactiveSheetPanel ActiveSheet
+    {
+        get => TabSheetManager.ActiveTabSheets.FirstOrDefault(t => t.IsActive)!;
+    }
+
+}
